@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb"
 
 async function initializeDatabase() {
-  const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/realestate"
+  const mongoUri = process.env.MONGODB_URI!
   const client = new MongoClient(mongoUri)
 
   try {

@@ -2,9 +2,10 @@
   "name": "real-estate-platform",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "next build",
-    "db:init": "ts-node scripts/init-mongodb.ts",
+    "db:init": "bun --env-file=.env.local ts-node scripts/init-mongodb.ts",
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start"

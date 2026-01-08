@@ -1,21 +1,18 @@
-import { betterAuth } from "better-auth"
-import { mongodbAdapter } from "better-auth/adapters/mongodb"
-import { MongoClient } from "mongodb"
-import { nextCookies } from "better-auth/next-js"
+import "dotenv/config";
+import { betterAuth } from "better-auth";
+import { mongodbAdapter } from "better-auth/adapters/mongodb";
+import { MongoClient } from "mongodb";
+import { nextCookies } from "better-auth/next-js";
 
-const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/realestate"
-const client = new MongoClient(mongoUri)
+const client = new MongoClient(process.env.MONGODB_URI!);
+const db = client.db();
 
-async function getDatabase() {
-  await client.connect()
-  return client.db("realestate")
-}
-
-let db: ReturnType<typeof client.db> | null = null
+const secret = process.env.BETTER_AUTH_SECRET;
+if (!secret) throw new Error("❌ BETTER_AUTH_SECRET not defined");
 
 export const auth = betterAuth({
-  database: mongodbAdapter(client),
-  secret: process.env.BETTER_AUTH_SECRET,
+  database: mongodbAdapter(db, { client }),
+  secret,
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
 
   emailAndPassword: {
@@ -35,23 +32,14 @@ export const auth = betterAuth({
   },
 
   plugins: [nextCookies()],
-
   user: {
     additionalFields: {
       role: {
         type: "string",
-        default: "buyer",
-        required: false,
+        default: null,
       },
     },
   },
-})
+});
 
-export async function connectDB() {
-  if (!db) {
-    db = await getDatabase()
-  }
-  return db
-}
-
-export { client as mongoClient }
+export type Session = typeof auth.$Infer.Session;

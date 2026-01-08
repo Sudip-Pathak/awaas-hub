@@ -11,7 +11,7 @@ export function SessionProvider({
   children: React.ReactNode
 }) {
   const [isLoading, setIsLoading] = useState(true)
-  const [session, setSession] = useState(null)
+  const [session, setSession] = useState<AuthClient | null >(null)
 
   useEffect(() => {
     const checkSession = async () => {
