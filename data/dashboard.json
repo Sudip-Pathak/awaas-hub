@@ -1,0 +1,77 @@
+{
+    "stats": [
+        {
+            "label": "Total Properties",
+            "value": "1,284",
+            "change": "+12.5%",
+            "icon": "Building2"
+        },
+        {
+            "label": "Active Listings",
+            "value": "847",
+            "change": "-8.2%",
+            "icon": "Home"
+        },
+        {
+            "label": "Total Clients",
+            "value": "3,429",
+            "change": "+23.1%",
+            "icon": "Users"
+        },
+        {
+            "label": "Revenue (MTD)",
+            "value": "$284.5K",
+            "change": "+15.3%",
+            "icon": "DollarSign"
+        }
+    ],
+    "recentProperties": [
+        {
+            "id": 1,
+            "title": "Modern Apartment",
+            "location": "New York, NY",
+            "price": "$1,200,000",
+            "views": "1.2k",
+            "messages": 32,
+            "image": "https://images.unsplash.com/photo-1502673530728-f79b4cab31b1"
+        },
+        {
+            "id": 2,
+            "title": "Luxury Villa",
+            "location": "Los Angeles, CA",
+            "price": "$2,850,000",
+            "views": "980",
+            "messages": 18,
+            "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
+        },
+        {
+            "id": 3,
+            "title": "Downtown Condo",
+            "location": "Chicago, IL",
+            "price": "$980,000",
+            "views": "740",
+            "messages": 12,
+            "image": "https://images.unsplash.com/photo-1568605114967-8130f3a36994"
+        }
+    ],
+    "todaysSchedule": [
+        {
+            "id": 1,
+            "title": "Client Meeting",
+            "time": "10:00 AM",
+            "type": "Property Viewing"
+        },
+        {
+            "id": 2,
+            "title": "Site Inspection",
+            "time": "1:30 PM",
+            "type": "Land Survey"
+        },
+        {
+            "id": 3,
+            "title": "Contract Discussion",
+            "time": "4:00 PM",
+            "type": "Legal Review"
+        }
+    ]
+}
