@@ -7,12 +7,7 @@ import StatsGrid from "./_components/stat-card";
 import RecentPropertiesCard from "./_components/recent-properties-card";
 import TodayScheduleCard from "./_components/today-schedule-card";
 
-import {
-  Home,
-  Building2,
-  Users,
-  DollarSign,
-} from "lucide-react";
+import { Home, Building2, Users, DollarSign } from "lucide-react";
 import Loading from "../_components/loading";
 
 export const iconMap = {
@@ -39,17 +34,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <RecentPropertiesCard properties={dashboard!.recentProperties} />
-        <TodayScheduleCard schedule={dashboard!.todaysSchedule} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <RecentPropertiesCard properties={dashboard!.recentProperties} />
-        <TodayScheduleCard schedule={dashboard!.todaysSchedule} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <RecentPropertiesCard properties={dashboard!.recentProperties} />
-        <TodayScheduleCard schedule={dashboard!.todaysSchedule} />
+        <TodayScheduleCard />
       </div>
     </div>
   );

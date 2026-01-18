@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 
 const formSchema = z.object({
     title: z.string().min(3, "Title must be at least 3 characters"),

@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { Property } from "@/lib/models/Property";
 import { Role, Permission, hasPermission } from "@/lib/rbac";
 import { getServerSession } from "@/lib/server/getSession";
+import { forbidden, internalServerError, unauthorized } from "@/lib/error";
 
 /**
  * GET /api/properties
@@ -13,17 +14,14 @@ import { getServerSession } from "@/lib/server/getSession";
 export async function GET() {
   try {
     const session = await getServerSession();
-    if (!session?.user)
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    if (!session?.user) return unauthorized();
 
     const role = session.user.role as Role;
 
     // Anyone with view_properties can see
-    if (!hasPermission(role, Permission.VIEW_PROPERTIES)) {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-    }
+    if (!hasPermission(role, Permission.VIEW_PROPERTIES)) return forbidden();
 
-    const userId = session.user.id;
+    const userId = session?.user.id;
     const query =
       role === Role.SELLER
         ? { sellerId: new mongoose.Types.ObjectId(userId) }
@@ -34,9 +32,6 @@ export async function GET() {
     return NextResponse.json(properties);
   } catch (err) {
     console.error(err);
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    );
+    return internalServerError();
   }
 }

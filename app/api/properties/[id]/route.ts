@@ -3,95 +3,118 @@ import mongoose from "mongoose";
 import { Property } from "@/lib/models/Property";
 import { Role, Permission, hasPermission } from "@/lib/rbac";
 import { getServerSession } from "@/lib/server/getSession";
-import { badRequest, forbidden, notFound, serverError, unauthorized } from "@/lib/error";
+import {
+  badRequest,
+  forbidden,
+  notFound,
+  internalServerError,
+  unauthorized,
+} from "@/lib/error";
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-    const session = await getServerSession()
-    if (!session?.user)
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const session = await getServerSession();
+  if (!session?.user) return unauthorized();
 
-    const role = session.user.role as Role;
+  const role = session.user.role as Role;
 
-    if (!hasPermission(role, Permission.VIEW_PROPERTIES)) {
-        return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+  if (!hasPermission(role, Permission.VIEW_PROPERTIES)) {
+    return forbidden();
+  }
+
+  const { id } = await params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return badRequest("Invalid property ID");
+  }
+
+  try {
+    const property = await Property.findById(id);
+    if (!property) return notFound("Property not found");
+
+    // Only seller can see their own private properties, others only view basic info
+    if (
+      role === Role.SELLER &&
+      property.sellerId.toString() !== session.user.id
+    ) {
+      return forbidden();
     }
 
-
-    const { id } = await params
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return NextResponse.json({ message: "Invalid property ID" }, { status: 400 });
-    }
-
-    try {
-        const property = await Property.findById(id);
-        if (!property) return NextResponse.json({ message: "Property not found" }, { status: 404 });
-
-        // Only seller can see their own private properties, others only view basic info
-        if (role === Role.SELLER && property.sellerId.toString() !== session.user.id) {
-            return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-        }
-
-        return NextResponse.json(property);
-    } catch (err) {
-        console.error(err);
-        return NextResponse.json({ message: "Internal server error" }, { status: 500 });
-    }
+    return NextResponse.json(property);
+  } catch (err) {
+    console.error(err);
+    return internalServerError();
+  }
 }
-
 
 // PUT - Edit property
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-    const session = await getServerSession();
-    if (!session?.user) return unauthorized();
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getServerSession();
+  if (!session?.user) return unauthorized();
 
-    const role = session.user.role as Role;
-    if (!hasPermission(role, Permission.MANAGE_PROPERTIES)) return forbidden();
+  const role = session.user.role as Role;
+  if (!hasPermission(role, Permission.MANAGE_PROPERTIES)) return forbidden();
 
-    const { id } = await params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return badRequest("Invalid ID");
+  const { id } = await params;
+  if (!mongoose.Types.ObjectId.isValid(id)) return badRequest("Invalid ID");
 
-    try {
-        const property = await Property.findById(id);
-        if (!property) return notFound();
+  try {
+    const property = await Property.findById(id);
+    if (!property) return notFound();
 
-        // Only admin or property owner
-        if (role !== Role.ADMIN && property.sellerId.toString() !== session.user.id) {
-            return forbidden();
-        }
-
-        const body = await req.json();
-        const updated = await Property.findByIdAndUpdate(id, body, { new: true, runValidators: true });
-
-        return NextResponse.json(updated);
-    } catch (err) {
-        return serverError();
+    // Only admin or property owner
+    if (
+      role !== Role.ADMIN &&
+      property.sellerId.toString() !== session.user.id
+    ) {
+      return forbidden();
     }
+
+    const body = await req.json();
+    const updated = await Property.findByIdAndUpdate(id, body, {
+      new: true,
+      runValidators: true,
+    });
+
+    return NextResponse.json(updated);
+  } catch (err) {
+    return internalServerError();
+  }
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
-    const session = await getServerSession();
-    if (!session?.user) return unauthorized();
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getServerSession();
+  if (!session?.user) return unauthorized();
 
-    const role = session.user.role as Role;
-    if (!hasPermission(role, Permission.MANAGE_PROPERTIES)) return forbidden();
+  const role = session.user.role as Role;
+  if (!hasPermission(role, Permission.MANAGE_PROPERTIES)) return forbidden();
 
-    const { id } = await params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return badRequest("Invalid ID");
+  const { id } = await params;
+  if (!mongoose.Types.ObjectId.isValid(id)) return badRequest("Invalid ID");
 
-    try {
-        const property = await Property.findById(id);
-        if (!property) return notFound();
+  try {
+    const property = await Property.findById(id);
+    if (!property) return notFound();
 
-        // Only admin or property owner
-        if (role !== Role.ADMIN && property.sellerId.toString() !== session.user.id) {
-            return forbidden();
-        }
-
-        await Property.findByIdAndDelete(id);
-        return NextResponse.json({ success: true });
-    } catch (err) {
-        return serverError();
+    // Only admin or property owner
+    if (
+      role !== Role.ADMIN &&
+      property.sellerId.toString() !== session.user.id
+    ) {
+      return forbidden();
     }
+
+    await Property.findByIdAndDelete(id);
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return internalServerError();
+  }
 }

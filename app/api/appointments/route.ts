@@ -1,56 +1,34 @@
+import { NextResponse } from "next/server";
+import { requirePermission, Permission, Role } from "@/lib/rbac";
+import { getServerSession } from "@/lib/server/getSession";
+import { Appointment } from "@/lib/models/Appointment";
+import { unauthorized } from "@/lib/error";
 
-// import { auth } from "@/lib/server/auth"
-// import { connectToDatabase } from "@/lib/server/db"
-// import { type NextRequest, NextResponse } from "next/server"
+export async function GET() {
+  const session = await getServerSession();
+  if (!session) return unauthorized();
 
-// export async function GET(request: NextRequest) {
-//     try {
-//         const session = await auth.api.getSession({
-//             headers: request.headers,
-//         })
+  requirePermission(session.user.role as Role, Permission.MANAGE_APPOINTMENTS);
 
-//         if (!session) {
-//             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-//         }
+  return NextResponse.json(
+    await Appointment.find({ participants: session.user.id }).sort({ date: 1 })
+  );
+}
 
-//         // const db = await connectToDatabase()
-//         // const appointments = await db
-//         //   .collection("appointments")
-//         //   .find({
-//         //     $or: [{ buyerId: session.user.id }, { sellerId: session.user.id }],
-//         //   })
-//         //   .toArray()
+export async function POST(req: Request) {
+  const session = await getServerSession();
+  if (!session) return unauthorized();
 
-//         return NextResponse.json(appointments)
-//     } catch (error) {
-//         console.error("Error fetching appointments:", error)
-//         return NextResponse.json({ error: "Failed to fetch appointments" }, { status: 500 })
-//     }
-// }
+  requirePermission(session.user.role as Role, Permission.MANAGE_APPOINTMENTS);
+  const body = await req.json();
 
-// export async function POST(request: NextRequest) {
-//     try {
-//         const session = await auth.api.getSession({
-//             headers: request.headers,
-//         })
+  console.log(`Body from the post ${body}`);
 
-//         if (!session) {
-//             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-//         }
+  const appointment = await Appointment.create({
+    ...body,
+    createdBy: session.user.id,
+    participants: [session.user.id, body.buyerId],
+  });
 
-//         const body = await request.json()
-//         const db = await connectToDatabase()
-
-//         const result = await db.collection("appointments").insertOne({
-//             ...body,
-//             buyerId: session.user.id,
-//             status: "pending",
-//             createdAt: new Date(),
-//         })
-
-//         return NextResponse.json({ id: result.insertedId, ...body }, { status: 201 })
-//     } catch (error) {
-//         console.error("Error creating appointment:", error)
-//         return NextResponse.json({ error: "Failed to create appointment" }, { status: 500 })
-//     }
-// }
+  return NextResponse.json(appointment);
+}

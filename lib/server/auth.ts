@@ -3,10 +3,7 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { nextCookies } from "better-auth/next-js";
 import { connectToDatabase } from "./db";
 
-import {
-  lastLoginMethod,
-} from "better-auth/plugins";
-import { fa } from "zod/v4/locales";
+import { lastLoginMethod, openAPI } from "better-auth/plugins";
 
 if (!process.env.BETTER_AUTH_SECRET) {
   throw new Error("❌ BETTER_AUTH_SECRET is not defined");
@@ -27,7 +24,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
-    autoSignIn: false
+    autoSignIn: false,
   },
 
   socialProviders: {
@@ -37,7 +34,7 @@ export const auth = betterAuth({
     },
   },
 
-  plugins: [nextCookies(), lastLoginMethod(),],
+  plugins: [nextCookies(), lastLoginMethod()],
 
   user: {
     additionalFields: {
