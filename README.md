@@ -11,12 +11,12 @@
 ### 1. Clone the Repository
 ```bash
 git clone <repository-url>
-cd real-estate-platform
+cd awas-hub
 ```
 
 ### 2. Install Dependencies
 ```bash
-npm install
+bun install
 ```
 
 ### 3. Set Up Environment Variables
@@ -46,14 +46,14 @@ For GitHub OAuth:
 
 ### 4. Initialize Database
 ```bash
-npm run db:init
+bun run db:init
 ```
 
 This will create all necessary MongoDB collections with proper indexes.
 
 ### 5. Run Development Server
 ```bash
-npm run dev
+bun dev
 ```
 
 Visit http://localhost:3000 to see your application.
@@ -61,7 +61,7 @@ Visit http://localhost:3000 to see your application.
 ## Project Structure
 
 ```
-real-estate-platform/
+awaas-hub/
 ├── app/
 │   ├── (auth)/               # Authentication pages
 │   │   ├── login/
