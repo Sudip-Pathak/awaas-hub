@@ -1,8 +1,3 @@
-// export default function PrivacyPolicy() {
-//   return <>Privacy Policy Page</>;
-// }
-
-
 export default function PrivacyPolicyPage() {
   return (
     <>
