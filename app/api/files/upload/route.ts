@@ -1,16 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "@/lib/server/getSession";
-import { unauthorized, internalServerError, notFound } from "@/lib/error";
+import {
+  unauthorized,
+  internalServerError,
+  notFound,
+  forbidden,
+} from "@/lib/error";
 import { getDb } from "@/lib/server/db";
 import Files from "@/lib/models/Files";
 import { uploadFile } from "@/lib/server/r2-client"; // your existing function
 import crypto from "crypto";
+import { hasPermission, Permission, Role } from "@/lib/rbac";
 
 export async function POST(req: NextRequest) {
   try {
     await getDb();
     const session = await getServerSession();
     if (!session?.user?.id) return unauthorized();
+
+    const role = session.user.role as Role;
+    if (!hasPermission(role, Permission.MANAGE_PROPERTIES)) return forbidden();
 
     const userId = session.user.id;
     const formData = await req.formData();
@@ -43,7 +52,7 @@ export async function POST(req: NextRequest) {
     // Upload to R2
     const d = await uploadFile(buffer, uniqueName, fileMetadata);
 
-    console.log("after upload:", d);
+    // console.log("after upload:", d);
 
     // Save to DB
     const doc = await Files.create({

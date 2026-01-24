@@ -14,8 +14,9 @@ export function badRequest(msg: string) {
   return NextResponse.json({ message: msg }, { status: 400 });
 }
 export function notFound(msg: string | undefined = "Not found") {
-  return NotFound();
+  return  NextResponse.json({ message: msg }, { status: 404 });;
 }
+
 /** @deprecated Use `internalServerError()` instead */
 export function ServerError() {
   return NextResponse.json({ message: "Server error" }, { status: 500 });

@@ -7,8 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/client/auth-client";
 import { UploadFileDialog } from "./_components/upload-file-dialog";
 import { FilesTable } from "./_components/files-table";
-
-
+import { Role, Permission, hasPermission } from "@/lib/rbac";
 
 export interface FileItem {
   _id: string;
@@ -26,6 +25,9 @@ export default function FilesPage() {
   const propertyId = searchParams.get("propertyId") ?? "";
   const { data: session } = useSession();
 
+  const role = session?.user?.role as Role;
+
+  const canManage = hasPermission(role, Permission.MANAGE_FILES);
   const [open, setOpen] = useState(false);
 
   /** Fetch files */
@@ -89,7 +91,6 @@ export default function FilesPage() {
         credentials: "include",
       });
       const { signedUrl } = await res.json();
-      
     } catch {
       toast.error("Unable to view file");
     }
@@ -122,7 +123,8 @@ export default function FilesPage() {
         isLoading={isLoading}
         onView={viewFile}
         onCopy={copyToClipboard}
-        onDelete={(name) => deleteMutation.mutate(name)}
+        onDelete={(name) => canManage && deleteMutation.mutate(name)}
+        canManage={canManage}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/client/auth-client";
 import Link from "next/link";
+import { Role, Permission, hasAnyPermission } from "@/lib/rbac";
 
 interface Property {
   _id: string;
@@ -22,6 +23,7 @@ export default function BuyerFavoritesPage() {
   const { data: session, isPending } = useSession();
   const [favorites, setFavorites] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasAccess, setHasAccess] = useState(true);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -31,17 +33,32 @@ export default function BuyerFavoritesPage() {
 
   useEffect(() => {
     if (session?.user) {
-      fetchFavorites();
+      const role = session.user.role as Role;
+
+      // Check if user can view or manage files/favorites
+      const allowed = hasAnyPermission(role, [
+        // Permission.VIEW_FILES,
+        Permission.MANAGE_FILES,
+      ]);
+      setHasAccess(allowed);
+
+      if (allowed) fetchFavorites();
+      else setIsLoading(false); // stop loading if no access
     }
   }, [session?.user]);
 
   const fetchFavorites = async () => {
     try {
       const response = await fetch("/api/favorites");
+      if (!response.ok) {
+        setFavorites([]);
+        return;
+      }
       const data = await response.json();
-      setFavorites(data);
+      setFavorites(data || []);
     } catch (error) {
       console.error("Error fetching favorites:", error);
+      setFavorites([]);
     } finally {
       setIsLoading(false);
     }
@@ -49,10 +66,8 @@ export default function BuyerFavoritesPage() {
 
   const removeFavorite = async (propertyId: string) => {
     try {
-      await fetch("/api/favorites", {
+      await fetch(`/api/properties/${propertyId}/favorites`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propertyId }),
       });
       setFavorites(favorites.filter((p) => p._id !== propertyId));
     } catch (error) {
@@ -68,33 +83,26 @@ export default function BuyerFavoritesPage() {
     );
   }
 
+  if (!hasAccess) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-red-500">
+        You do not have permission to view favorites.
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link
-            href="/dashboard"
-            className="text-lg font-bold text-foreground hover:text-primary"
-          >
-            Real Estate Platform
-          </Link>
-        </div>
-      </header>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold text-foreground mb-8">
-          Saved Properties
-        </h1>
-
         {isLoading ? (
           <div className="text-center">Loading favorites...</div>
         ) : favorites.length === 0 ? (
           <div className="text-center">
             <p className="text-muted-foreground mb-4">
-              You haven't saved any properties yet.
+              No saved properties yet.
             </p>
             <Link
-              href="/buyer/properties"
+              href="/properties"
               className="inline-block bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90"
             >
               Browse Properties
@@ -107,7 +115,7 @@ export default function BuyerFavoritesPage() {
                 key={property._id}
                 className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-smooth"
               >
-                {property.images && property.images[0] && (
+                {property.images?.[0] && (
                   <div className="w-full h-48 bg-muted relative">
                     <img
                       src={property.images[0] || "/placeholder.svg"}
@@ -138,7 +146,7 @@ export default function BuyerFavoritesPage() {
                   </div>
                   <div className="flex gap-2">
                     <Link
-                      href={`/buyer/property/${property._id}`}
+                      href={`/properties/${property._id}`}
                       className="flex-1 bg-primary text-primary-foreground py-2 rounded-lg text-center hover:bg-primary/90 transition-smooth text-sm"
                     >
                       View Details

@@ -54,13 +54,14 @@ export const auth = betterAuth({
     },
   },
 
-  plugins: [nextCookies(), lastLoginMethod(), admin()],
+  plugins: [nextCookies(), lastLoginMethod()],
 
   user: {
     additionalFields: {
       role: {
         type: "string",
         default: null,
+        input: true,
       },
     },
     constraints: {

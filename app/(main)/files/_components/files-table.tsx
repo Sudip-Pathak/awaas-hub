@@ -1,111 +1,3 @@
-// "use client";
-
-// import {
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableHead,
-//   TableHeader,
-//   TableRow,
-// } from "@/components/ui/table";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuLabel,
-//   DropdownMenuSeparator,
-//   DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu";
-// import { Button } from "@/components/ui/button";
-// import { MoreHorizontal, Eye, Copy, Trash } from "lucide-react";
-// import { FileItem } from "../page";
-
-// interface Props {
-//   files: FileItem[];
-//   isLoading: boolean;
-//   onView: (storedName: string) => void;
-//   onCopy: (storedName: string) => void;
-//   onDelete: (storedName: string) => void;
-// }
-
-// export function FilesTable({
-//   files,
-//   isLoading,
-//   onView,
-//   onCopy,
-//   onDelete,
-// }: Props) {
-//   return (
-//     <div className="p-4 bg-slate-900 rounded-md shadow-md">
-//       <Table>
-//         <TableHeader>
-//           <TableRow>
-//             <TableHead>Filename</TableHead>
-//             <TableHead>Privacy</TableHead>
-//             <TableHead>Size</TableHead>
-//             <TableHead>Property</TableHead>
-//             <TableHead>Uploaded</TableHead>
-//             <TableHead>Actions</TableHead>
-//           </TableRow>
-//         </TableHeader>
-
-//         <TableBody>
-//           {isLoading ? (
-//             [...Array(5)].map((_, i) => (
-//               <TableRow key={i}>
-//                 <TableCell colSpan={6}>
-//                   <div className="h-8 bg-slate-800 animate-pulse rounded" />
-//                 </TableCell>
-//               </TableRow>
-//             ))
-//           ) : files.length === 0 ? (
-//             <TableRow>
-//               <TableCell colSpan={6} className="text-center py-8">
-//                 No files uploaded
-//               </TableCell>
-//             </TableRow>
-//           ) : (
-//             files.map((f) => (
-//               <TableRow key={f._id}>
-//                 <TableCell>{f.filename}</TableCell>
-//                 <TableCell>{f.isPrivate ? "Private" : "Public"}</TableCell>
-//                 <TableCell>{(f.size / 1024).toFixed(2)} KB</TableCell>
-//                 <TableCell>{f.propertyId || "-"}</TableCell>
-//                 <TableCell>{new Date(f.createdAt).toLocaleString()}</TableCell>
-//                 <TableCell>
-//                   <DropdownMenu>
-//                     <DropdownMenuTrigger asChild>
-//                       <Button variant="ghost" size="icon">
-//                         <MoreHorizontal />
-//                       </Button>
-//                     </DropdownMenuTrigger>
-//                     <DropdownMenuContent align="end">
-//                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-//                       <DropdownMenuSeparator />
-//                       <DropdownMenuItem onClick={() => onView(f.storedName)}>
-//                         <Eye className="mr-2 h-4 w-4" /> View
-//                       </DropdownMenuItem>
-//                       <DropdownMenuItem onClick={() => onCopy(f.storedName)}>
-//                         <Copy className="mr-2 h-4 w-4" /> Copy URL
-//                       </DropdownMenuItem>
-//                       <DropdownMenuItem
-//                         className="text-destructive"
-//                         onClick={() => onDelete(f.storedName)}
-//                       >
-//                         <Trash className="mr-2 h-4 w-4" /> Delete
-//                       </DropdownMenuItem>
-//                     </DropdownMenuContent>
-//                   </DropdownMenu>
-//                 </TableCell>
-//               </TableRow>
-//             ))
-//           )}
-//         </TableBody>
-//       </Table>
-//     </div>
-//   );
-// }
-
 "use client";
 
 import {
@@ -135,6 +27,7 @@ interface Props {
   onView: (storedName: string) => void;
   onCopy: (storedName: string) => void;
   onDelete: (storedName: string) => void;
+  canManage: boolean;
 }
 
 export function FilesTable({
@@ -143,6 +36,7 @@ export function FilesTable({
   onView,
   onCopy,
   onDelete,
+  canManage,
 }: Props) {
   const router = useRouter();
   console.log(files);
@@ -151,7 +45,7 @@ export function FilesTable({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
-            <TableHead className="w-[260px]">Filename</TableHead>
+            <TableHead className="w-65">Filename</TableHead>
             <TableHead>Privacy</TableHead>
             <TableHead>Size</TableHead>
             <TableHead>Property</TableHead>
@@ -235,13 +129,15 @@ export function FilesTable({
                         Copy URL
                       </DropdownMenuItem>
 
-                      <DropdownMenuItem
-                        className="text-destructive focus:text-destructive"
-                        onClick={() => onDelete(f.storedName)}
-                      >
-                        <Trash className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
+                      {canManage && (
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => onDelete(f.storedName)}
+                        >
+                          <Trash className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
