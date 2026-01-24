@@ -86,7 +86,7 @@ export default function SignupPage() {
               router.replace("/login");
             },
             onError(ctx: any) {
-              toast.error(ctx.error.cause);
+              toast.error(ctx.error.message);
             },
           },
         );
