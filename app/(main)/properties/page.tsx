@@ -101,3 +101,7 @@ export default function PropertiesTablePage() {
   // Authorized - show content
   return <PropertiesContent canManage={canManage} />;
 }
+
+
+
+
