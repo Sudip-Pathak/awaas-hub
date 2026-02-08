@@ -80,7 +80,7 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-@theme inline {
+@theme {
   --font-sans: var(--font-sans);
   --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
